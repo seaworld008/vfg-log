@@ -1,4 +1,4 @@
-# 一个基于VictoriaLogs + Fluent Bit + Grafana 的高新能日志收集系统 VFG-LOG
+# VFG-LOG 一个基于VictoriaLogs + Fluent Bit + Grafana 的高新能日志收集系统
 
 ## 系统架构
 
