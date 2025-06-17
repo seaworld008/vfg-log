@@ -1,4 +1,4 @@
-# VictoriaLogs + Fluent Bit + Grafana 日志收集系统部署文档
+# 一个基于VictoriaLogs + Fluent Bit + Grafana 的高新能日志收集系统
 
 ## 系统架构
 
