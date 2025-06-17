@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  fluentbit:
+    image: fluent/fluent-bit:3.0.7
+    container_name: fluentbit
+    restart: always
+    ports:
+      - "2020:2020"    # HTTP监控端口
+      - "24224:24224"  # Forward输入端口
+      - "5140:5140"    # Syslog输入端口
+    volumes:
+      - ./conf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./logs:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/host/var/log:ro
+    environment:
+      - TZ=Asia/Shanghai
+      - FLUENT_CONF=fluent-bit.conf
+      - FLUENT_OPT=
+      - VICTORIA_LOGS_HOST=${VICTORIA_LOGS_HOST:-127.0.0.1}
+      - VICTORIA_LOGS_PORT=${VICTORIA_LOGS_PORT:-9428}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2020/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+  # Fluent Bit配置热重载辅助容器
+  fluentbit-reload:
+    image: alpine:latest
+    container_name: fluentbit-reload
+    restart: "no"
+    volumes:
+      - ./conf:/conf
+    command: |
+      sh -c "
+        echo 'Fluent Bit配置文件监控容器启动完成'
+        echo '配置文件位置: /conf/'
+        echo '重载命令: docker kill -s HUP fluentbit'
+        echo 'VictoriaLogs地址: \${VICTORIA_LOGS_HOST:-127.0.0.1}:\${VICTORIA_LOGS_PORT:-9428}'
+        sleep infinity
+      " 

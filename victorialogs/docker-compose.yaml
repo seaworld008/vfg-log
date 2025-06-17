@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  victorialogs:
+    image: 114.115.130.46/jlkj-base/victoriametrics/victoria-logs:v1.23.3-victorialogs
+    container_name: victorialogs
+    restart: always
+    ports:
+      - "9428:9428"
+    volumes:
+      - ./victoria-logs-data:/victoria-logs-data
+    command:
+      - '--storageDataPath=/victoria-logs-data'
+      - '--httpListenAddr=:9428'
+      - '--retentionPeriod=180d'
+      - '--loggerFormat=json'
+      - '--loggerOutput=stderr'
+      - '--maxConcurrentInserts=16'
+      - '--memory.allowedPercent=80'
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9428/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    environment:
+      - TZ=Asia/Shanghai
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536 
